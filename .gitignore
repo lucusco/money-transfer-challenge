@@ -1,7 +1,11 @@
-/vendor
+/vendor/
 /.idea
+.vscode/
+/coverage/
 .editorconfig
 Homestead.json
 Homestead.yaml
 .env
 .phpunit.result.cache
+/logs/*
+!/logs/README.md
