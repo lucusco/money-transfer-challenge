@@ -11,8 +11,10 @@
     "require": {
         "php": "^8.2",
         "ext-json": "*",
+        "illuminate/validation": "^10.30",
         "monolog/monolog": "^2.8",
         "php-di/php-di": "^6.4",
+        "prettus/laravel-validation": "^1.5",
         "slim/psr7": "^1.5",
         "slim/slim": "^4.10"
     },
