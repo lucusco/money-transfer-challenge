@@ -2,15 +2,22 @@
 
 require '../vendor/autoload.php';
 
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
+use DI\ContainerBuilder;
 
-$app = AppFactory::create();
+//Container
+$containerBuilder = new ContainerBuilder();
+$container = $containerBuilder->build();
 
-$app->get('/', function (Request $request, Response $response, $args) {
-    $response->getBody()->write("Hello world!");
-    return $response;
-});
+$app = AppFactory::createFromContainer($container);
+
+// Parse json, form data and xml
+$app->addBodyParsingMiddleware();
+$app->addRoutingMiddleware();
+$app->addErrorMiddleware(true, true, true);
+
+// Routes
+$routes = require '../app/routes.php';
+$routes($app);
 
 $app->run();
