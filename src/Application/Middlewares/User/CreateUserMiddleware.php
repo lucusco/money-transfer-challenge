@@ -4,24 +4,34 @@ declare(strict_types=1);
 
 namespace MoneyTransfer\Application\Middlewares\User;
 
-use MoneyTransfer\Application\Middlewares\PostValidator;
-use Prettus\Validator\Contracts\ValidatorInterface;
-use Prettus\Validator\Exceptions\ValidatorException;
+use MoneyTransfer\Application\Validators\UserValidator;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Psr\Http\Server\MiddlewareInterface;
-use Illuminate\Support\Facades\Validator;
 
 class CreateUserMiddleware implements MiddlewareInterface
 {
-    /*public function __construct(private PostValidator $validator)
-    {
-    }*/
+    public function __construct(
+        private readonly UserValidator $validator,
+        private readonly ResponseFactoryInterface $responseFactory
+    ) {
+    }
 
     public function process(Request $request, RequestHandler $handler): Response
     {
-        //$ok = $this->validate($request);
+        $ok = $this->validate($request);
+
+        if (!$ok) {
+            $response = $this->responseFactory
+                ->createResponse()
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(400);
+            $response->getBody()->write(json_encode(['message' => 'Invalid data provided']));
+
+            return $response;
+        }
 
         return $handler->handle($request);
     }
@@ -29,11 +39,8 @@ class CreateUserMiddleware implements MiddlewareInterface
     private function validate(Request $request)
     {
         try {
-            $this->validator->with($request->getParsedBody())
-                ->passesOrFail(ValidatorInterface::RULE_CREATE);
-
-            return true;
-        } catch (ValidatorException $e) {
+            return $this->validator->validate($request);
+        } catch (\Exception $e) {
             return false;
         }
     }
